@@ -1,7 +1,7 @@
 [project]
-name = "immich-project"
+name = "immich-gallery-analysis"
 version = "0.1.0"
-description = "Add your description here"
+description = "Just another weekend project :)"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
@@ -15,6 +15,7 @@ dependencies = [
     "pillow>=12.1.1",
     "plotly>=6.6.0",
     "psycopg2>=2.9.11",
+    "python-dotenv>=1.2.2",
     "scikit-learn>=1.8.0",
     "seaborn>=0.13.2",
     "sqlalchemy>=2.0.48",

@@ -498,7 +498,9 @@ class TravelVisualizer:
 
     # --- PUBLIC API ---
 
-    def plot_country_histogram_report(self, country: str, save_dir: str = None) -> None:
+    def plot_country_histogram_report(
+        self, country: str | List[str], save_dir: str = None
+    ) -> None:
         """Plots the true density distribution (KDE+IQR) of visuals for a country."""
         self._plot_histogram_report("country", country, "Country", save_dir)
 
