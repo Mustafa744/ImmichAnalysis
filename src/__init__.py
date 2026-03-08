@@ -7,4 +7,5 @@ from .viz import (
     plot_city_histogram_report,
     plot_country_timestamp_report,
     plot_city_timestamp_report,
+    generate_country_markdown_report,
 )
