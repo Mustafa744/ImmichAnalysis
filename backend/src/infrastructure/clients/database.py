@@ -1,9 +1,9 @@
-# src/db_client.py
 import pandas as pd
 from sqlalchemy import create_engine, text
-from src.config import DB_URL
+from app.core.config import DB_URL
 
 engine = create_engine(DB_URL)
+
 
 def get_all_photos() -> pd.DataFrame:
     query = text("""
@@ -43,6 +43,7 @@ def get_all_photos() -> pd.DataFrame:
     with engine.connect() as conn:
         df = pd.read_sql(query, conn)
     return df
+
 
 def get_clip_embeddings() -> pd.DataFrame:
     query = text("""

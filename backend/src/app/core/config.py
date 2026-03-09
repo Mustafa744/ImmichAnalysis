@@ -3,7 +3,7 @@ import os
 from pathlib import Path
 
 # Load from .env file at the project root
-ROOT_DIR = Path(__file__).resolve().parent.parent
+ROOT_DIR = Path(__file__).resolve().parents[4]
 load_dotenv(dotenv_path=ROOT_DIR / ".env")
 
 IMMICH_URL = os.getenv("IMMICH_URL")

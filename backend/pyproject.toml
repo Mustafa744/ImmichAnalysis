@@ -5,6 +5,7 @@ description = "Just another weekend project :)"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "fastapi>=0.135.1",
     "httpx>=0.28.1",
     "ipykernel>=7.2.0",
     "ipython>=9.11.0",
@@ -15,10 +16,12 @@ dependencies = [
     "pillow>=12.1.1",
     "plotly>=6.6.0",
     "psycopg2>=2.9.11",
+    "pydantic-settings>=2.13.1",
     "python-dotenv>=1.2.2",
     "scikit-learn>=1.8.0",
     "seaborn>=0.13.2",
     "sqlalchemy>=2.0.48",
     "tqdm>=4.67.3",
     "umap-learn>=0.5.11",
+    "uvicorn>=0.41.0",
 ]

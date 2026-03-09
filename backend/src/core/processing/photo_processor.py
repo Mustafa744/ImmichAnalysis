@@ -1,12 +1,11 @@
 import pandas as pd
-from typing import Tuple, List
+from typing import Tuple, List, Optional
 from pathlib import Path
-
-from src.config import PHOTOS_CSV
+from app.core.config import PHOTOS_CSV
 
 
 def load_and_preprocess_photos(
-    csv_path: str | Path = PHOTOS_CSV, home_countries: List[str] = None
+    csv_path: str | Path = PHOTOS_CSV, home_countries: Optional[List[str]] = None
 ) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """
     Loads the photos csv, adds time features, and splits into full, travel, and home dataframes.
