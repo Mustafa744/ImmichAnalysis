@@ -1,0 +1,164 @@
+@import "tailwindcss";
+
+/* ── Design Tokens ─────────────────────────────────────────── */
+@theme {
+  --color-bg-primary: #0a0a0f;
+  --color-bg-secondary: #12121a;
+  --color-bg-card: #1a1a2e;
+  --color-bg-card-hover: #222240;
+  --color-bg-glass: rgba(26, 26, 46, 0.6);
+
+  --color-border: rgba(255, 255, 255, 0.06);
+  --color-border-active: rgba(139, 92, 246, 0.4);
+
+  --color-text-primary: #f0f0f5;
+  --color-text-secondary: #8888a0;
+  --color-text-muted: #55556a;
+
+  --color-accent: #8b5cf6;
+  --color-accent-soft: rgba(139, 92, 246, 0.15);
+  --color-accent-glow: rgba(139, 92, 246, 0.3);
+
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+  --color-info: #3b82f6;
+
+  --color-chart-red: #ff6b6b;
+  --color-chart-green: #51cf66;
+  --color-chart-blue: #339af0;
+  --color-chart-purple: #cc5de8;
+  --color-chart-orange: #ff922b;
+  --color-chart-cyan: #22b8cf;
+  --color-chart-pink: #f06595;
+  --color-chart-yellow: #fcc419;
+
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* ── Base ──────────────────────────────────────────────────── */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* ── Scrollbar ─────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* ── Glass Card ────────────────────────────────────────────── */
+.glass-card {
+  background: var(--color-bg-glass);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+}
+
+.glass-card-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.glass-card-hover:hover {
+  background: var(--color-bg-card-hover);
+  border-color: var(--color-border-active);
+  box-shadow: 0 0 30px var(--color-accent-glow);
+  transform: translateY(-2px);
+}
+
+/* ── Glow Effects ──────────────────────────────────────────── */
+.glow-accent {
+  box-shadow: 0 0 20px var(--color-accent-glow),
+              0 0 60px rgba(139, 92, 246, 0.1);
+}
+
+.glow-text {
+  text-shadow: 0 0 20px var(--color-accent-glow);
+}
+
+/* ── Animations ────────────────────────────────────────────── */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse-soft {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--color-bg-card) 25%,
+    var(--color-bg-card-hover) 50%,
+    var(--color-bg-card) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* ── Staggered children ────────────────────────────────────── */
+.stagger-children > * {
+  opacity: 0;
+  animation: fadeInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+.stagger-children > *:nth-child(1) { animation-delay: 0.05s; }
+.stagger-children > *:nth-child(2) { animation-delay: 0.1s; }
+.stagger-children > *:nth-child(3) { animation-delay: 0.15s; }
+.stagger-children > *:nth-child(4) { animation-delay: 0.2s; }
+.stagger-children > *:nth-child(5) { animation-delay: 0.25s; }
+.stagger-children > *:nth-child(6) { animation-delay: 0.3s; }
+.stagger-children > *:nth-child(7) { animation-delay: 0.35s; }
+.stagger-children > *:nth-child(8) { animation-delay: 0.4s; }
+.stagger-children > *:nth-child(9) { animation-delay: 0.45s; }
+.stagger-children > *:nth-child(10) { animation-delay: 0.5s; }
+
+/* ── Recharts Overrides ────────────────────────────────────── */
+.recharts-cartesian-axis-tick-value {
+  fill: var(--color-text-muted) !important;
+  font-size: 11px !important;
+}
+.recharts-legend-item-text {
+  color: var(--color-text-secondary) !important;
+  font-size: 12px !important;
+}
+.recharts-tooltip-wrapper {
+  outline: none !important;
+}
