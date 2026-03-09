@@ -1,44 +1,17 @@
-import { useCallback, useMemo } from "react";
-import { Aperture, X, Search } from "lucide-react";
+import { NavLink } from "react-router-dom";
+import { Aperture, Map, TrendingUp, Clock, X } from "lucide-react";
 import { useFilters } from "../../context/FilterContext";
-import { useApi } from "../../hooks/useApi";
-import { fetchCountries, fetchCities } from "../../services/api";
-import CountryCard from "../ui/CountryCard";
 import DateRangePicker from "../ui/DateRangePicker";
-import Loader from "../ui/Loader";
 
 export default function AppShell({ children }) {
-  const {
-    selectedCountry,
-    selectedCity,
-    dateFrom,
-    dateTo,
-    setCountry,
-    setCity,
-    setDateRange,
-    clearFilters,
-    hasActiveFilters,
-  } = useFilters();
+  const { dateFrom, dateTo, setDateRange, clearFilters, hasActiveFilters } =
+    useFilters();
 
-  const countriesFetch = useCallback(() => fetchCountries(), []);
-  const { data: countries, loading: countriesLoading } = useApi(
-    countriesFetch,
-    [],
-  );
-
-  const citiesFetch = useCallback(
-    () =>
-      selectedCountry ? fetchCities(selectedCountry) : Promise.resolve([]),
-    [selectedCountry],
-  );
-  const { data: cities } = useApi(citiesFetch, [selectedCountry], {
-    enabled: !!selectedCountry,
-  });
-
-  const sortedCountries = useMemo(() => {
-    if (!countries) return [];
-    return [...countries].sort((a, b) => b.count - a.count);
-  }, [countries]);
+  const navItems = [
+    { to: "/", icon: Map, label: "Country Overview" },
+    { to: "/timeline", icon: TrendingUp, label: "Timeline" },
+    { to: "/frequency", icon: Clock, label: "Photo Frequency" },
+  ];
 
   return (
     <div className="flex h-screen overflow-hidden">
@@ -57,75 +30,32 @@ export default function AppShell({ children }) {
           </div>
         </div>
 
-        {/* Country list */}
-        <div className="flex-1 overflow-y-auto px-3 py-3 space-y-1">
-          {countriesLoading ? (
-            <Loader rows={6} className="px-2" />
-          ) : (
-            sortedCountries.map((c) => (
-              <CountryCard
-                key={c.country}
-                country={c.country}
-                count={c.count}
-                isActive={selectedCountry === c.country}
-                onClick={() =>
-                  setCountry(selectedCountry === c.country ? null : c.country)
-                }
-              />
-            ))
-          )}
-        </div>
-
-        {/* Sidebar footer */}
-        <div className="px-4 py-3 border-t border-border">
-          <p className="text-[10px] text-text-muted text-center">
-            {countries?.length ?? 0} countries ·{" "}
-            {countries?.reduce((s, c) => s + c.count, 0)?.toLocaleString() ?? 0}{" "}
-            photos
-          </p>
-        </div>
+        {/* Navigation */}
+        <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
+          {navItems.map((item) => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              className={({ isActive }) =>
+                `flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 ${
+                  isActive
+                    ? "bg-accent/10 text-accent font-medium"
+                    : "text-text-secondary hover:bg-bg-card hover:text-text-primary"
+                }`
+              }
+            >
+              <item.icon size={18} />
+              <span className="text-sm">{item.label}</span>
+            </NavLink>
+          ))}
+        </nav>
       </aside>
 
       {/* ── Main Area ───────────────────────────────────── */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
-        <header className="flex items-center justify-between px-6 py-4 border-b border-border bg-bg-secondary/50 backdrop-blur-md">
-          <div className="flex items-center gap-3">
-            <h2 className="text-lg font-semibold">
-              {selectedCountry ? (
-                <span className="flex items-center gap-2">
-                  {selectedCountry}
-                  {selectedCity && (
-                    <span className="text-text-muted font-normal text-sm">
-                      / {selectedCity}
-                    </span>
-                  )}
-                </span>
-              ) : (
-                <span className="text-text-muted">
-                  Select a country to explore
-                </span>
-              )}
-            </h2>
-          </div>
-
+        <header className="flex items-center justify-end px-6 py-4 border-b border-border bg-bg-secondary/50 backdrop-blur-md">
           <div className="flex items-center gap-4">
-            {/* City picker */}
-            {cities?.length > 0 && (
-              <select
-                value={selectedCity || ""}
-                onChange={(e) => setCity(e.target.value || null)}
-                className="bg-bg-card border border-border rounded-lg px-3 py-1.5 text-xs text-text-primary focus:outline-none focus:border-accent/50 transition-colors cursor-pointer"
-              >
-                <option value="">All Cities</option>
-                {cities.map((city) => (
-                  <option key={city} value={city}>
-                    {city}
-                  </option>
-                ))}
-              </select>
-            )}
-
             <DateRangePicker
               dateFrom={dateFrom}
               dateTo={dateTo}
