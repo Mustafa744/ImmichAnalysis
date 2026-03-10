@@ -14,9 +14,9 @@ export default function AppShell({ children }) {
   ];
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="flex h-screen overflow-hidden p-3 gap-3">
       {/* ── Sidebar ─────────────────────────────────────── */}
-      <aside className="w-72 shrink-0 border-r border-border bg-bg-secondary flex flex-col">
+      <aside className="w-72 shrink-0 border border-border bg-bg-secondary flex flex-col rounded-2xl overflow-hidden">
         {/* Brand */}
         <div className="flex items-center gap-3 px-5 py-5 border-b border-border">
           <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-accent/15">
@@ -52,16 +52,10 @@ export default function AppShell({ children }) {
       </aside>
 
       {/* ── Main Area ───────────────────────────────────── */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden border border-border rounded-2xl bg-bg-secondary/20">
         {/* Header */}
         <header className="flex items-center justify-end px-6 py-4 border-b border-border bg-bg-secondary/50 backdrop-blur-md">
-          <div className="flex items-center gap-4">
-            <DateRangePicker
-              dateFrom={dateFrom}
-              dateTo={dateTo}
-              onChange={setDateRange}
-            />
-
+          <div className="flex items-center gap-3">
             {hasActiveFilters && (
               <button
                 onClick={clearFilters}
@@ -75,7 +69,7 @@ export default function AppShell({ children }) {
         </header>
 
         {/* Content */}
-        <main className="flex-1 overflow-y-auto p-6">{children}</main>
+        <main className="flex-1 overflow-y-auto p-5">{children}</main>
       </div>
     </div>
   );

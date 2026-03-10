@@ -31,7 +31,10 @@ export default function IrqMetrics({ data }) {
 
   return (
     <Card title="Image Quality Metrics" icon={Sun}>
-      <div className="grid grid-cols-2 gap-4">
+      <div
+        className="grid grid-cols-2 gap-3"
+        style={{ minHeight: 340, alignContent: "flex-start" }}
+      >
         {metrics.map(({ key, label, icon: Icon, color, maxVal }) => {
           const value = data[key] ?? 0;
           const pct = Math.min((value / maxVal) * 100, 100);

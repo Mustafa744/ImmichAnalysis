@@ -40,7 +40,7 @@ export default function MomentsBreakdown({ data }) {
 
   return (
     <Card title="Moments" icon={Sunrise}>
-      <div className="h-64">
+      <div style={{ width: "100%", height: 340, minHeight: 340 }}>
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie

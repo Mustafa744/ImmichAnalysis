@@ -44,8 +44,17 @@ async def get_overview(
         most_active_month = (
             df["localDateTime"].dt.to_period("M").mode()[0].strftime("%Y-%m")
         )
+        top_shooting_hour = int(df["localDateTime"].dt.hour.mode()[0])
     else:
         most_active_month = None
+        top_shooting_hour = None
+
+    top_location = None
+    if not df.empty and "city" in df and "country" in df:
+        loc_counts = df.groupby(["country", "city"]).size()
+        if not loc_counts.empty:
+            best_loc = loc_counts.idxmax()
+            top_location = f"{best_loc[1]}, {best_loc[0]}"
 
     return {
         "total_photos": total_photos,
@@ -53,4 +62,6 @@ async def get_overview(
         "date_range": date_range,
         "most_active_country": most_active_country,
         "most_active_month": most_active_month,
+        "top_shooting_hour": top_shooting_hour,
+        "top_location": top_location,
     }

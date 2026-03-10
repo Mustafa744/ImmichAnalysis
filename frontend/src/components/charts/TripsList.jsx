@@ -20,7 +20,7 @@ function TripCard({ trip }) {
   );
 
   return (
-    <div className="glass-card glass-card-hover p-4 flex items-start gap-4">
+    <div className="glass-card glass-card-hover p-4 flex items-start gap-3">
       <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-accent/10 shrink-0">
         <Navigation size={18} className="text-accent" />
       </div>

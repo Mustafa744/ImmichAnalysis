@@ -56,11 +56,11 @@ export default function HourlyDistribution({ data }) {
 
   return (
     <Card title="Hourly Distribution" icon={Clock}>
-      <div className="h-64">
+      <div style={{ width: "100%", height: 340, minHeight: 340 }}>
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
             data={data}
-            margin={{ top: 5, right: 5, left: -20, bottom: 0 }}
+            margin={{ top: 20, right: 30, left: 10, bottom: 20 }}
           >
             <CartesianGrid
               strokeDasharray="3 3"

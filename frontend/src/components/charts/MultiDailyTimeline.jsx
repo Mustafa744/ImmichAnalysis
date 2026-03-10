@@ -18,17 +18,7 @@ import {
   LineChart as LineChartIcon,
 } from "lucide-react";
 
-const COLORS = [
-  "#8b5cf6", // purple
-  "#22b8cf", // cyan
-  "#ff922b", // orange
-  "#51cf66", // green
-  "#fcc419", // yellow
-  "#ff6b6b", // red
-  "#339af0", // blue
-  "#cc5de8", // violet
-  "#20c997", // teal
-];
+import { CHART_COLORS } from "../../utils/colors";
 
 function CustomTooltip({ active, payload, label }) {
   if (!active || !payload?.length) return null;
@@ -64,7 +54,7 @@ export default function MultiDailyTimeline({ data, countries }) {
   const ChartComponent = chartType === "line" ? LineChart : BarChart;
 
   return (
-    <Card title="Timeline Comparison" icon={TrendingUp}>
+    <Card title="Comparison View" icon={TrendingUp} className="w-full">
       <div className="flex justify-end mb-4 pr-6">
         <div className="flex items-center bg-bg-card border border-border rounded-lg p-1">
           <button
@@ -93,7 +83,7 @@ export default function MultiDailyTimeline({ data, countries }) {
         <ResponsiveContainer width="100%" height="100%">
           <ChartComponent
             data={displayData}
-            margin={{ top: 5, right: 30, left: -20, bottom: 0 }}
+            margin={{ top: 20, right: 30, left: 10, bottom: 20 }}
           >
             <CartesianGrid
               strokeDasharray="3 3"
@@ -117,13 +107,13 @@ export default function MultiDailyTimeline({ data, countries }) {
                     type="monotone"
                     dataKey={country}
                     name={country}
-                    stroke={COLORS[idx % COLORS.length]}
+                    stroke={CHART_COLORS[idx % CHART_COLORS.length]}
                     strokeWidth={2}
                     dot={false}
                     connectNulls={false}
                     activeDot={{
                       r: 4,
-                      stroke: COLORS[idx % COLORS.length],
+                      stroke: CHART_COLORS[idx % CHART_COLORS.length],
                       strokeWidth: 2,
                       fill: "#0a0a0f",
                     }}
@@ -135,7 +125,7 @@ export default function MultiDailyTimeline({ data, countries }) {
                   key={country}
                   dataKey={country}
                   name={country}
-                  fill={COLORS[idx % COLORS.length]}
+                  fill={CHART_COLORS[idx % CHART_COLORS.length]}
                   radius={[2, 2, 0, 0]}
                 />
               );

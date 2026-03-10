@@ -34,6 +34,7 @@ export default function ShotTypesChart({ data }) {
   if (!data) return null;
 
   const chartData = Object.entries(data)
+    .filter(([key]) => key !== "macro")
     .map(([key, val]) => ({ name: LABELS[key] || key, value: val.count }))
     .filter((d) => d.value > 0);
 
@@ -41,12 +42,12 @@ export default function ShotTypesChart({ data }) {
 
   return (
     <Card title="Shot Types" icon={Camera}>
-      <div className="h-64">
+      <div style={{ width: "100%", height: 340, minHeight: 340 }}>
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
             data={chartData}
             layout="vertical"
-            margin={{ top: 5, right: 20, left: 10, bottom: 5 }}
+            margin={{ top: 20, right: 30, left: 10, bottom: 20 }}
           >
             <XAxis
               type="number"

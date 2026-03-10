@@ -77,12 +77,16 @@ export default function MultiHourlyDistribution({ data, countries }) {
   if (!data?.length || !countries?.length) return null;
 
   return (
-    <Card title="Photo Frequency Comparison" icon={Clock}>
+    <Card
+      title="Photo Frequency Comparison"
+      icon={Clock}
+      className="mt-6 mx-2 md:mx-6 mb-8"
+    >
       <div style={{ width: "100%", height: 400, minHeight: 400 }}>
         <ResponsiveContainer width="100%" height="100%">
           <LineChart
             data={data}
-            margin={{ top: 5, right: 30, left: -20, bottom: 0 }}
+            margin={{ top: 20, right: 30, left: 10, bottom: 20 }}
           >
             <CartesianGrid
               strokeDasharray="3 3"

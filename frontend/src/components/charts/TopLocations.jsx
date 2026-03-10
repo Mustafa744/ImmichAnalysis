@@ -32,11 +32,11 @@ export default function TopLocations({ data }) {
 
   return (
     <Card title="Top Locations" icon={MapPin}>
-      <div className="h-64">
+      <div style={{ width: "100%", height: 340, minHeight: 340 }}>
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
             data={chartData}
-            margin={{ top: 5, right: 5, left: -10, bottom: 0 }}
+            margin={{ top: 20, right: 30, left: 10, bottom: 20 }}
           >
             <XAxis
               dataKey="label"
