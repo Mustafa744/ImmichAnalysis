@@ -4,7 +4,7 @@ import * as api from '../services/api';
 import { useFilters } from '../context/FilterContext';
 
 export function useDashboardData() {
-  const { filterParams, selectedCountry } = useFilters();
+  const { filterParams, selectedCountry, selectedCity } = useFilters();
   const hasCountry = !!selectedCountry;
 
   // ── Country/City Fetching ──────────────────────────
@@ -33,6 +33,10 @@ export function useDashboardData() {
   const shotTypesFn = useCallback(() => api.fetchShotTypes(filterParams), [filterParams]);
   const topLocFn = useCallback(() => api.fetchTopLocations(filterParams), [filterParams]);
   const tripsFn = useCallback(() => api.fetchTrips(filterParams), [filterParams]);
+  const palettesFn = useCallback(
+    () => (selectedCity ? api.fetchPalettesByCity(filterParams) : api.fetchPalettesByCountry(filterParams)),
+    [filterParams, selectedCity]
+  );
 
   const overview = useApi(overviewFn, [filterParams], { enabled: hasCountry });
   const daily = useApi(dailyFn, [filterParams], { enabled: hasCountry });
@@ -42,10 +46,11 @@ export function useDashboardData() {
   const shotTypes = useApi(shotTypesFn, [filterParams], { enabled: hasCountry });
   const topLoc = useApi(topLocFn, [filterParams], { enabled: hasCountry });
   const trips = useApi(tripsFn, [filterParams], { enabled: hasCountry });
+  const palettes = useApi(palettesFn, [filterParams, selectedCity], { enabled: hasCountry });
 
   const anyLoading =
     hasCountry &&
-    (overview.loading || daily.loading || hourly.loading || histograms.loading);
+    (overview.loading || daily.loading || hourly.loading || histograms.loading || palettes.loading);
   const firstError = hasCountry && (overview.error || daily.error);
 
   return {
@@ -60,6 +65,7 @@ export function useDashboardData() {
     shotTypes,
     topLoc,
     trips,
+    palettes,
     anyLoading,
     firstError,
     hasCountry,

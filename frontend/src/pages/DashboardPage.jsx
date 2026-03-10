@@ -8,6 +8,7 @@ import IrqMetrics from "../components/charts/IrqMetrics";
 import MomentsBreakdown from "../components/charts/MomentsBreakdown";
 import ShotTypesChart from "../components/charts/ShotTypesChart";
 import TopLocations from "../components/charts/TopLocations";
+import LocationPalette from "../components/charts/LocationPalette";
 import Loader from "../components/ui/Loader";
 import ErrorState from "../components/ui/ErrorState";
 import { Sparkles } from "lucide-react";
@@ -56,6 +57,7 @@ export default function DashboardPage() {
     moments,
     shotTypes,
     topLoc,
+    palettes,
     anyLoading,
     firstError,
     hasCountry,
@@ -133,11 +135,18 @@ export default function DashboardPage() {
             ) : (
               <DailyTimeline data={daily.data} />
             )}
-            {hourly.loading ? (
-              <Loader rows={6} className="glass-card p-5" />
-            ) : (
-              <HourlyDistribution data={hourly.data} />
-            )}
+            <div className="flex flex-col gap-3">
+              {palettes.loading ? (
+                <Loader rows={6} className="glass-card p-5" />
+              ) : (
+                <LocationPalette data={palettes.data} loading={palettes.loading} />
+              )}
+              {hourly.loading ? (
+                <Loader rows={6} className="glass-card p-5" />
+              ) : (
+                <HourlyDistribution data={hourly.data} />
+              )}
+            </div>
           </div>
 
           {/* Row 3: Colors + Metrics */}

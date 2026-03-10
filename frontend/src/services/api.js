@@ -40,8 +40,6 @@ export const fetchTripDetails = (tripId, filters) => get(`/timeline/trips/${trip
 export const fetchHistograms = (filters) => get('/colors/histograms', filters);
 export const fetchPalette = (filters) => get('/colors/palette', filters);
 
-// ── Insights ────────────────────────────────────────────────
-export const fetchMoments = (filters) => get('/insights/moments', filters);
-export const fetchShotTypes = (filters) => get('/insights/shot-types', filters);
-export const fetchBurstClusters = (filters) => get('/insights/burst-clusters', filters);
-export const fetchTopLocations = (filters) => get('/insights/top-locations', filters);
+// ── Palettes ────────────────────────────────────────────────
+export const fetchPalettesByCountry = (filters) => get('/palettes/by-country', filters);
+export const fetchPalettesByCity = (filters) => get('/palettes/by-city', filters);
