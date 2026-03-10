@@ -1,6 +1,6 @@
 import httpx
-from PIL import Image
-from io import BytesIO
+import cv2
+import numpy as np
 from tqdm import tqdm
 
 
@@ -10,7 +10,8 @@ class ImmichClient:
         self.headers  = {"x-api-key": api_key}
         self.timeout  = timeout
 
-    def get_thumbnail(self, asset_id: str, size: str = "preview") -> Image.Image | None:
+    def get_thumbnail(self, asset_id: str, size: str = "preview") -> np.ndarray | None:
+        """Download thumbnail and return as RGB numpy array, or None on failure."""
         try:
             r = httpx.get(
                 f"{self.base_url}/api/assets/{asset_id}/thumbnail",
@@ -19,7 +20,11 @@ class ImmichClient:
                 timeout=self.timeout,
             )
             r.raise_for_status()
-            return Image.open(BytesIO(r.content)).convert("RGB")
+            buf = np.frombuffer(r.content, dtype=np.uint8)
+            bgr = cv2.imdecode(buf, cv2.IMREAD_COLOR)
+            if bgr is None:
+                return None
+            return cv2.cvtColor(bgr, cv2.COLOR_BGR2RGB)
         except httpx.TimeoutException:
             tqdm.write(f"  [TIMEOUT]  {asset_id}")
         except httpx.HTTPStatusError as e:

@@ -25,18 +25,18 @@ class ThumbnailCache:
             from tqdm import tqdm
             tqdm.write(f"  [cache] Checkpoint at {step}/{total} — {len(self.data)} cached")
 
-    def __contains__(self, key: str) -> bool:
-        return key in self.data
+    def __contains__(self, key) -> bool:
+        return str(key) in self.data
 
-    def __getitem__(self, key: str):
-        return self.data[key]
+    def __getitem__(self, key):
+        return self.data[str(key)]
 
-    def __setitem__(self, key: str, value):
-        self.data[key] = value
+    def __setitem__(self, key, value):
+        self.data[str(key)] = value
 
     def __len__(self):
         return len(self.data)
 
-    def missing_from(self, ids: list[str]) -> list[str]:
+    def missing_from(self, ids: list) -> list:
         """Return IDs not yet in cache."""
-        return [i for i in ids if i not in self.data]
+        return [i for i in ids if str(i) not in self.data]

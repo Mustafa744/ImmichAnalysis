@@ -4,6 +4,7 @@ import numpy as np
 
 from app.api.deps import LocationFilter, location_filter
 from app.services.data_service import DataService
+from core.analysis.palette_analyzer import compute_location_palette
 
 router = APIRouter()
 
@@ -83,12 +84,26 @@ async def get_histograms(
 async def get_color_palette(
     loc: LocationFilter = Depends(location_filter),
 ) -> List[Dict[str, Any]]:
-    # TBD: Dynamic K-Means on pixels returning Hex
-    return [
-        {"color": "#FFFFFF", "percentage": 15},
-        {"color": "#000000", "percentage": 10},
-        {"color": "#4A90E2", "percentage": 75},
-    ]
+    """Returns aggregated 5-color palette via KMeans on cached dominant colors."""
+    df = DataService.get_filtered_df(loc)
+
+    if df.empty or "id" not in df:
+        return []
+
+    cache = DataService.get_analysis_cache()
+
+    all_colors: list[dict] = []
+    for _, row in df.iterrows():
+        pid = str(row["id"])
+        if pid in cache:
+            colors = cache[pid].get("dominant_colors")
+            if colors:
+                all_colors.extend(colors)
+
+    if not all_colors:
+        return []
+
+    return compute_location_palette(all_colors, k=5)
 
 
 @router.get("/trending")

@@ -1,5 +1,4 @@
 import pandas as pd
-from typing import List, Dict, Any, Optional
 from concurrent.futures import ThreadPoolExecutor
 from tqdm import tqdm
 
@@ -7,7 +6,7 @@ from app.core.config import IMMICH_URL, API_KEY, CACHE_PATH, MAX_WORKERS
 from infrastructure.clients.immich import ImmichClient
 from infrastructure.clients.database import get_all_photos
 from infrastructure.persistence.cache import ThumbnailCache
-from core.analysis.image_analyzer import analyze_thumbnail
+from core.analysis.image_analyzer import analyze_thumbnail, extract_dominant_colors
 from core.analysis.clusterer import cluster_photos
 from core.processing.photo_processor import load_and_preprocess_photos
 
@@ -54,6 +53,46 @@ class PhotoService:
 
         self.cache.save()
         return self.cache.data
+
+    def backfill_dominant_colors(self):
+        """
+        Backfill existing cache entries that are missing the 'dominant_colors' key.
+        Re-downloads thumbnails only for those entries and extracts dominant colors.
+        """
+        needs_backfill = [
+            aid for aid, data in self.cache.data.items()
+            if "dominant_colors" not in data
+        ]
+
+        if not needs_backfill:
+            print("All cache entries already have dominant_colors.")
+            return
+
+        print(f"Backfilling dominant_colors for {len(needs_backfill)} entries...")
+
+        def backfill_one(asset_id: str):
+            img = self.immich_client.get_thumbnail(asset_id)
+            if img:
+                return asset_id, extract_dominant_colors(img)
+            return asset_id, None
+
+        with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
+            results = list(
+                tqdm(
+                    executor.map(backfill_one, needs_backfill),
+                    total=len(needs_backfill),
+                    desc="Backfilling colors",
+                )
+            )
+
+        updated = 0
+        for asset_id, colors in results:
+            if colors and asset_id in self.cache:
+                self.cache[asset_id]["dominant_colors"] = colors
+                updated += 1
+
+        self.cache.save()
+        print(f"Backfilled {updated} entries with dominant_colors.")
 
     def get_clusters(self, n_clusters: int = 8):
         """Cluster photos based on cached analysis."""
