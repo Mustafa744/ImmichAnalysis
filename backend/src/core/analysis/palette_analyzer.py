@@ -1,114 +1,131 @@
-import cv2
+"""
+palette_analyzer.py
+
+Aggregates per-photo swatches into a definitive location color signature.
+Executes Agglomerative Clustering in CIELAB space to extract the top 3 
+dominant, true-to-life colors per swatch category, avoiding muddy averages.
+"""
+
+from __future__ import annotations
+
+from collections import defaultdict
 import numpy as np
-from sklearn.cluster import MiniBatchKMeans
+from skimage.color import rgb2lab, lab2rgb
+from sklearn.cluster import AgglomerativeClustering
 
-# How aggressively to boost saturated colors during aggregation.
-# weight_i *= (1 + SATURATION_BOOST * S_norm), so at S=255 → ~3× boost.
-_SATURATION_BOOST = 5.0
+# ---------------------------------------------------------------------------
+# Constants
+# ---------------------------------------------------------------------------
 
+# Canonical Vibrant swatch types in display order (vivid → muted).
+SWATCH_TYPES: list[str] = [
+    "vibrant",
+    "light_vibrant",
+    "dark_vibrant",
+    "muted",
+    "light_muted",
+    "dark_muted",
+]
+
+# ---------------------------------------------------------------------------
+# Private helpers
+# ---------------------------------------------------------------------------
 
 def _hex_to_rgb(hex_str: str) -> list[int]:
-    """Convert '#AABBCC' to [170, 187, 204]."""
+    """Convert '#AABBCC' → [170, 187, 204]."""
     h = hex_str.lstrip("#")
     return [int(h[i : i + 2], 16) for i in (0, 2, 4)]
 
+def _extract_rgb(c: dict) -> list[int] | None:
+    """Pull rgb out of a swatch dict; return None on bad input."""
+    if "rgb" in c:
+        return c["rgb"]
+    elif "hex" in c:
+        return _hex_to_rgb(c["hex"])
+    return None
 
-def _rgb_to_hex(r: int, g: int, b: int) -> str:
-    return "#{:02X}{:02X}{:02X}".format(int(r), int(g), int(b))
+# ---------------------------------------------------------------------------
+# Public API
+# ---------------------------------------------------------------------------
 
-
-def _saturation_boost_weights(
-    rgb_array: np.ndarray,
-    base_weights: np.ndarray,
-    boost: float = _SATURATION_BOOST,
-) -> np.ndarray:
+def compute_location_palette(all_colors: list[dict]) -> dict[str, list[str]]:
     """
-    Multiply each sample weight by a saturation-based boost factor.
-
-    Factor = 1 + boost * (S / 255), where S is the HSV saturation.
-    Low-saturation (muddy) colors keep factor ≈ 1,
-    high-saturation (vivid) colors get factor up to 1 + boost.
-    """
-    hsv_row = cv2.cvtColor(rgb_array.reshape(1, -1, 3), cv2.COLOR_RGB2HSV)
-    sat = hsv_row.reshape(-1, 3)[:, 1].astype(np.float32) / 255.0  # 0-1
-    factor = 1.0 + boost * sat
-    return base_weights * factor
-
-
-def compute_location_palette(
-    all_colors: list[dict],
-    k: int = 5,
-) -> list[dict]:
-    """
-    Aggregate per-photo dominant colors into a single location palette.
-
-    Pipeline:
-      1. Collect RGB + proportion from every photo's dominant colors.
-      2. Boost weights by saturation so vivid colors dominate over muddy tones.
-      3. Cluster in CIELAB (perceptually uniform) with boosted weights.
-      4. Convert centroids back to RGB for output.
+    Executes the Top-3 Agglomerative Format:
+    1. Isolate by Category: pool all swatches of each type.
+    2. Convert to LAB Space: convert pooled RGBs to CIELAB using skimage.
+    3. Cluster: run Agglomerative Clustering with strict color boundaries.
+    4. Extract: find the median color of the largest clusters.
+    5. Assemble: return the top 3 hex codes for each swatch.
 
     Args:
-        all_colors: flat list of {"hex", "rgb", "proportion"} dicts
-                    pooled from every photo in the location.
-        k: number of palette colors to return.
+        all_colors: Flat list of swatch dicts pooled from every photo in the location.
 
     Returns:
-        Sorted list of [{"hex": "#...", "rgb": [...], "proportion": float}]
+        Dictionary mapping each swatch type to a list of up to 3 Hex strings.
     """
     if not all_colors:
-        return []
+        return {}
 
-    rgb_array = np.array([c["rgb"] for c in all_colors], dtype=np.uint8)
-    base_weights = np.array(
-        [c.get("proportion", c.get("percentage", 1.0)) for c in all_colors],
-        dtype=float,
-    )
+    # 1. Isolate by Category
+    buckets: dict[str, list[list[int]]] = defaultdict(list)
 
-    n_unique = len(np.unique(rgb_array, axis=0))
-    effective_k = min(k, n_unique)
-    if effective_k == 0:
-        return []
+    for c in all_colors:
+        rgb = _extract_rgb(c)
+        if rgb is None:
+            continue
+            
+        swatch_type = c.get("swatch_type")
+        if swatch_type in SWATCH_TYPES:
+            buckets[swatch_type].append(rgb)
 
-    # Boost vivid colors so they outweigh muddy earth tones
-    weights = _saturation_boost_weights(rgb_array, base_weights)
+    final_palette: dict[str, list[str]] = {}
 
-    # Convert RGB → LAB for perceptually uniform clustering
-    lab_row = cv2.cvtColor(rgb_array.reshape(1, -1, 3), cv2.COLOR_RGB2LAB)
-    lab_array = lab_row.reshape(-1, 3).astype(np.float32)
+    for swatch_type in SWATCH_TYPES:
+        if swatch_type not in buckets or not buckets[swatch_type]:
+            final_palette[swatch_type] = []
+            continue
 
-    km = MiniBatchKMeans(
-        n_clusters=effective_k, random_state=42, n_init=3, batch_size=256
-    )
-    labels = km.fit_predict(lab_array, sample_weight=weights)
-    centroids_lab = km.cluster_centers_
+        rgb_array = np.array(buckets[swatch_type], dtype=np.float32) / 255.0
 
-    # Convert LAB centroids → RGB
-    lab_centroids_img = centroids_lab.reshape(1, -1, 3).astype(np.uint8)
-    rgb_centroids = cv2.cvtColor(lab_centroids_img, cv2.COLOR_LAB2RGB).reshape(-1, 3)
+        # 2. Convert to LAB Space
+        lab_array = rgb2lab(rgb_array.reshape(-1, 1, 3)).reshape(-1, 3)
 
-    # Weight-aware proportion per cluster (use boosted weights for consistency)
-    cluster_weights = np.zeros(effective_k)
-    for i, label in enumerate(labels):
-        cluster_weights[label] += weights[i]
-    total_weight = cluster_weights.sum()
-    proportions = (
-        (cluster_weights / total_weight) * 100
-        if total_weight > 0
-        else np.zeros(effective_k)
-    )
+        # 3. Calculate Representative Colors via Agglomerative Clustering
+        if len(lab_array) < 3:
+            # If we have fewer than 3 colors total, just use them directly
+            unique_labels = np.arange(len(lab_array))
+            labels = unique_labels
+            counts = np.ones(len(lab_array), dtype=int)
+        else:
+            agglo = AgglomerativeClustering(
+                n_clusters=None, 
+                distance_threshold=22, 
+                linkage='complete'
+            )
+            labels = agglo.fit_predict(lab_array)
+            unique_labels, counts = np.unique(labels, return_counts=True)
 
-    order = np.argsort(-proportions)
+        # 4. Extract Medians of the clusters
+        lab_centers = []
+        for label in unique_labels:
+            cluster_points = lab_array[labels == label]
+            lab_centers.append(np.median(cluster_points, axis=0))
+            
+        lab_centers = np.array(lab_centers)
 
-    palette = []
-    for idx in order:
-        r, g, b = rgb_centroids[idx]
-        palette.append(
-            {
-                "hex": _rgb_to_hex(r, g, b),
-                "rgb": [int(r), int(g), int(b)],
-                "proportion": round(float(proportions[idx]), 1),
-            }
-        )
+        # Convert medians back to 0-1 RGB
+        rgb_centers = lab2rgb(lab_centers.reshape(-1, 1, 3)).reshape(-1, 3)
 
-    return palette
+        # 5. Extract Top 3 and Assemble Hex Codes
+        sorted_indices = np.argsort(counts)[::-1]
+        top_3_hex_codes = []
+        
+        for idx in sorted_indices[:3]:
+            rank_rgb = rgb_centers[idx]
+            r, g, b = (np.clip(rank_rgb, 0, 1) * 255).astype(int)
+            hex_color = f"#{r:02x}{g:02x}{b:02x}"
+            top_3_hex_codes.append(hex_color)
+
+        final_palette[swatch_type] = top_3_hex_codes
+
+    return final_palette

@@ -3,8 +3,21 @@ import pandas as pd
 from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import KMeans
 
-from .image_analyzer import extract_feature_vector
-
+def extract_feature_vector(entry: dict) -> np.ndarray:
+    """Flatten all numeric fields into a single vector for clustering."""
+    scalar = [
+        entry.get("brightness", 0),
+        entry.get("colorfulness", 0),
+        entry.get("sky_score", 0),
+        entry.get("warmth", 0),
+    ]
+    empty_hist = [0] * 32
+    hist = (
+        entry.get("r_hist", empty_hist) + 
+        entry.get("g_hist", empty_hist) + 
+        entry.get("b_hist", empty_hist)
+    )
+    return np.array(scalar + hist, dtype=np.float32)
 
 def build_feature_matrix(results: dict, ids: list[str]) -> tuple[np.ndarray, list[str]]:
     valid_ids = [i for i in ids if i in results]

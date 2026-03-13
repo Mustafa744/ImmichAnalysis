@@ -9,14 +9,19 @@ router = APIRouter()
 
 
 def _collect_colors_for_ids(photo_ids: list[str], cache) -> list[dict]:
-    """Collect all dominant_colors entries from cache for the given photo IDs."""
+    """Collect all color_palette entries from cache for the given photo IDs."""
     all_colors: list[dict] = []
     for pid in photo_ids:
         pid_str = str(pid)
         if pid_str in cache:
-            colors = cache[pid_str].get("dominant_colors")
+            colors = cache[pid_str].get("color_palette")
             if colors:
-                all_colors.extend(colors)
+                if isinstance(colors, dict):
+                    # Convert dict mapping {"vibrant": "#HEX"} to list of dicts
+                    for name, hex_val in colors.items():
+                        all_colors.append({"hex": hex_val, "swatch_type": name})
+                elif isinstance(colors, list):
+                    all_colors.extend(colors)
     return all_colors
 
 
@@ -46,12 +51,14 @@ async def get_palettes_by_country(
         if not all_colors:
             continue
 
-        palette = compute_location_palette(all_colors, k=5)
-        results.append({
-            "country": str(country),
-            "count": len(photo_ids),
-            "palette": palette,
-        })
+        palette = compute_location_palette(all_colors)
+        results.append(
+            {
+                "country": str(country),
+                "count": len(photo_ids),
+                "palette": palette,
+            }
+        )
 
     # Sort by photo count descending
     results.sort(key=lambda x: x["count"], reverse=True)
@@ -84,13 +91,15 @@ async def get_palettes_by_city(
         if not all_colors:
             continue
 
-        palette = compute_location_palette(all_colors, k=5)
-        results.append({
-            "city": str(city),
-            "country": str(country) if country and str(country) != "nan" else None,
-            "count": len(photo_ids),
-            "palette": palette,
-        })
+        palette = compute_location_palette(all_colors)
+        results.append(
+            {
+                "city": str(city),
+                "country": str(country) if country and str(country) != "nan" else None,
+                "count": len(photo_ids),
+                "palette": palette,
+            }
+        )
 
     results.sort(key=lambda x: x["count"], reverse=True)
     return results

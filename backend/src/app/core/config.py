@@ -16,7 +16,7 @@ DB_URL = (
 # Shared Paths
 DATA_DIR = ROOT_DIR / "data"
 PHOTOS_CSV = DATA_DIR / "photos.csv"
-CACHE_PATH = DATA_DIR / "thumbnails_analysis.json"
+CACHE_PATH = DATA_DIR / "thumbnails_analysis.parquet"
 
 # General App Settings
 MAX_WORKERS = 8

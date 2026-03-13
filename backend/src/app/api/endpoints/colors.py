@@ -84,7 +84,7 @@ async def get_histograms(
 async def get_color_palette(
     loc: LocationFilter = Depends(location_filter),
 ) -> List[Dict[str, Any]]:
-    """Returns aggregated 5-color palette via KMeans on cached dominant colors."""
+    """Returns aggregated 5-color palette via KMeans on cached color palettes."""
     df = DataService.get_filtered_df(loc)
 
     if df.empty or "id" not in df:
@@ -96,7 +96,7 @@ async def get_color_palette(
     for _, row in df.iterrows():
         pid = str(row["id"])
         if pid in cache:
-            colors = cache[pid].get("dominant_colors")
+            colors = cache[pid].get("color_palette")
             if colors:
                 all_colors.extend(colors)
 
@@ -112,7 +112,7 @@ async def get_trending_colors(
 ) -> List[Dict[str, Any]]:
     # TBD: Chronological mood shifts
     return [
-        {"month": "2024-01", "dominant_color": "#FFFFFF"},
-        {"month": "2024-02", "dominant_color": "#000000"},
-        {"month": "2024-03", "dominant_color": "#4A90E2"},
+        {"month": "2024-01", "color": "#FFFFFF"},
+        {"month": "2024-02", "color": "#000000"},
+        {"month": "2024-03", "color": "#4A90E2"},
     ]
