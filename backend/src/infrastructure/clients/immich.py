@@ -10,7 +10,7 @@ class ImmichClient:
         self.headers  = {"x-api-key": api_key}
         self.timeout  = timeout
 
-    def get_thumbnail(self, asset_id: str, size: str = "preview") -> np.ndarray | None:
+    def get_thumbnail(self, asset_id: str, size: str = "thumbnail") -> np.ndarray | None:
         """Download thumbnail and return as RGB numpy array, or None on failure."""
         try:
             r = httpx.get(

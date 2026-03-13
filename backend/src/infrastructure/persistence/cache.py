@@ -1,23 +1,33 @@
-import json
 import os
+import pandas as pd
 
 
 class ThumbnailCache:
     def __init__(self, path: str):
         self.path = path
         self.data: dict = {}
-        if os.path.exists(path):
+        
+        # Load from parquet if exists
+        if os.path.exists(self.path):
             self.load()
+        # Fallback to json for backwards compatibility/migration
+        elif os.path.exists(self.path.replace(".parquet", ".json")):
+            print("[cache] Migrating from JSON to Parquet...")
+            import json
+            with open(self.path.replace(".parquet", ".json")) as f:
+                self.data = json.load(f)
+            self.save()
 
     def load(self):
-        with open(self.path) as f:
-            self.data = json.load(f)
+        df = pd.read_parquet(self.path)
+        self.data = df.to_dict(orient="index")
         print(f"[cache] Loaded {len(self.data)} entries from {self.path}")
 
     def save(self):
+        if not self.data:
+            return
         os.makedirs(os.path.dirname(self.path), exist_ok=True)
-        with open(self.path, "w") as f:
-            json.dump(self.data, f)
+        pd.DataFrame.from_dict(self.data, orient="index").to_parquet(self.path)
 
     def checkpoint(self, step: int, every: int = 200, total: int = 0):
         if step > 0 and step % every == 0:
