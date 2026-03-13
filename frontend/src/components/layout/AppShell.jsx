@@ -9,8 +9,8 @@ export default function AppShell({ children }) {
 
   const navItems = [
     { to: "/", icon: Map, label: "Country Overview" },
-    { to: "/timeline", icon: TrendingUp, label: "Timeline" },
-    { to: "/frequency", icon: Clock, label: "Photo Frequency" },
+    { to: "/timeline", icon: TrendingUp, label: "Timeline ⚠️🚧" },
+    { to: "/frequency", icon: Clock, label: "Photo Frequency ⚠️🚧" },
   ];
 
   return (

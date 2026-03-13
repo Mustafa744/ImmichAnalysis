@@ -20,7 +20,7 @@ import {
 function CustomTooltip({ active, payload, label }) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="glass-card p-3 !rounded-xl text-xs">
+    <div className="glass-card p-3 !rounded-xl text-xs flex flex-col min-h-0 relative">
       <p className="text-text-primary font-medium mb-1">{label}</p>
       <p className="text-accent">{payload[0].value.toLocaleString()} photos</p>
     </div>
