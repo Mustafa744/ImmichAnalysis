@@ -5,10 +5,7 @@
 A weekend project: localized visual analytics suite for your [Immich](https://immich.app/) photo library. Extract deep insights from your memories using advanced image processing and geographic metadata.
 
 <p align="center">
-  <img src="assets/dashboard.png" width="80%" alt="Dashboard Overview" />
-</p>
-<p align="center">
-  <img src="assets/timeline.png" width="80%" alt="Timeline Overview" />
+  <img src="assets/image.png" width="80%" alt="Dashboard Overview" />
 </p>
 
 ---
